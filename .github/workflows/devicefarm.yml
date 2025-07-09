@@ -25,16 +25,16 @@ jobs:
     - name: Upload App (.apk)
       id: upload_app
       run: |
-        CMD="aws devicefarm create-upload --project-arn \"$DEVICEFARM_PROJECT_ARN\" --name \"app-debug1.apk\" --type ANDROID_APP"
-        echo "Running command: $CMD"
-        app_upload=$($CMD)
-        echo "Upload response: $app_upload"
+        app_upload=$(aws devicefarm create-upload \
+          --project-arn "$DEVICEFARM_PROJECT_ARN" \
+          --name "app-debug1.apk" \
+          --type ANDROID_APP \
+          --region $AWS_REGION)
+        
+        app_url=$(echo $app_upload | jq -r '.upload.url')
+        app_arn=$(echo $app_upload | jq -r '.upload.arn')
 
-        app_url=$(echo "$app_upload" | jq -r '.upload.url')
-        app_arn=$(echo "$app_upload" | jq -r '.upload.arn')
-
-        echo "Uploading APK to $app_url ..."
-        curl -T app-debug1 "$app_url"
+        curl -T app/my-app.apk "$app_url"
 
         echo "APP_ARN=$app_arn" >> $GITHUB_ENV
       env:
