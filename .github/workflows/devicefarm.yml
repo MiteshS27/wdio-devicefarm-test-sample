@@ -25,7 +25,10 @@ jobs:
     - name: Upload App (.apk)
       id: upload_app
       run: |
-        CMD="aws devicefarm create-upload --project-arn \"$DEVICEFARM_PROJECT_ARN\" --name \"app-debug1.apk\" --type ANDROID_APP"
+        CMD=aws devicefarm create-upload \
+        --project-arn arn:aws:devicefarm:us-west-2:399834612211:project:2dc31dff-4e58-483d-9845-1b93fabc55f5 \
+        --name app-debug.apk \
+        --type ANDROID_APPP"
         echo "Running command: $CMD"
         app_upload=$($CMD)
         echo "Upload response: $app_upload"
