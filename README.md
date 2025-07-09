@@ -1,0 +1,1 @@
+# wdio-devicefarm-test-sample
