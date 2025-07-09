@@ -27,7 +27,7 @@ jobs:
       run: |
         app_upload=$(aws devicefarm create-upload \
           --project-arn "$DEVICEFARM_PROJECT_ARN" \
-          --name "my-app.apk" \
+          --name "app-debug1.apk" \
           --type ANDROID_APP \
           --region $AWS_REGION)
         
