@@ -1,0 +1,19 @@
+version: 0.1
+
+phases:
+  install:
+    commands:
+      - npm install
+
+  test:
+    commands:
+      - chmod +x ./run-tests.sh
+      - ./run-tests.sh
+
+artifacts:
+  - "**/results/**/*.xml"
+  - "**/screenshots/**/*"
+  - "**/allure-results/**/*"
+
+run-as:
+  user: devicefarm
