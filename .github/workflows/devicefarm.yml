@@ -118,11 +118,9 @@ jobs:
             "nfc": true,
             "wifi": true
           },
-          "billingMethod": "METERED",
-          "vpceConfigurationArns": []
+          "billingMethod": "METERED"
         }' \
         --region "$AWS_REGION"
-
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
