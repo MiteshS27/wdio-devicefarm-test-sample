@@ -98,32 +98,68 @@ jobs:
         AWS_REGION: ${{ secrets.AWS_REGION }}
         DEVICEFARM_PROJECT_ARN: ${{ secrets.DEVICEFARM_PROJECT_ARN }}
 
-    - name: Start test run on AWS Device Farm
+    # - name: Start test run on AWS Device Farm
+    #   run: |
+    #     aws devicefarm schedule-run \
+    #     --project-arn "$DEVICEFARM_PROJECT_ARN" \
+    #     --app-arn "$APP_ARN" \
+    #     --device-pool-arn "$DEVICEFARM_DEVICE_POOL_ARN" \
+    #     --name "WDIO Test Run" \
+    #     --test type=APPIUM_NODE,testPackageArn="$TEST_ARN",testSpecArn="$TEST_SPEC_ARN" \
+    #     --configuration '{
+    #       "locale": "en_US",
+    #       "location": {
+    #         "latitude": 47.6205,
+    #         "longitude": -122.3493
+    #       },
+    #       "radios": {
+    #         "bluetooth": true,
+    #         "gps": true,
+    #         "nfc": true,
+    #         "wifi": true
+    #       },
+    #       "billingMethod": "METERED"
+    #     }' \
+    #     --region "$AWS_REGION"
+    - name: Schedule Device Farm run (BUILTIN_FUZZ)
       run: |
         aws devicefarm schedule-run \
-        --project-arn "$DEVICEFARM_PROJECT_ARN" \
-        --app-arn "$APP_ARN" \
-        --device-pool-arn "$DEVICEFARM_DEVICE_POOL_ARN" \
-        --name "WDIO Test Run" \
-        --test type=APPIUM_NODE,testPackageArn="$TEST_ARN",testSpecArn="$TEST_SPEC_ARN" \
-        --configuration '{
-          "locale": "en_US",
-          "location": {
-            "latitude": 47.6205,
-            "longitude": -122.3493
-          },
-          "radios": {
-            "bluetooth": true,
-            "gps": true,
-            "nfc": true,
-            "wifi": true
-          },
-          "billingMethod": "METERED"
-        }' \
-        --region "$AWS_REGION"
+          --project-arn "$DEVICEFARM_PROJECT_ARN" \
+          --app-arn "$APP_ARN" \
+          --device-pool-arn "$DEVICEFARM_DEVICE_POOL_ARN" \
+          --name "My Device Farm run" \
+          --test '{
+            "type": "BUILTIN_FUZZ",
+            "parameters": {
+              "bluetooth": "false",
+              "gps": "true",
+              "nfc": "true",
+              "wifi": "true"
+            }
+          }' \
+          --configuration '{
+            "extraDataPackageArn": "$TEST_SPEC_ARN",
+            "locale": "en_US",
+            "customerArtifactPaths": {
+              "deviceHostPaths": ["$WORKING_DIRECTORY"]
+            },
+            "billingMethod": "METERED",
+            "radios": {
+              "bluetooth": false,
+              "gps": true,
+              "nfc": true,
+              "wifi": true
+            }
+          }' \
+          --execution-configuration '{
+            "videoCapture": true,
+            "skipAppResign": false,
+            "jobTimeoutMinutes": 150
+          }'
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
         DEVICEFARM_PROJECT_ARN: ${{ secrets.DEVICEFARM_PROJECT_ARN }}
         DEVICEFARM_DEVICE_POOL_ARN: ${{ secrets.DEVICEFARM_DEVICE_POOL_ARN }}
+    
