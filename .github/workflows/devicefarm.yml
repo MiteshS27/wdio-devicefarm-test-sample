@@ -34,7 +34,7 @@ jobs:
         app_url=$(echo $app_upload | jq -r '.upload.url')
         app_arn=$(echo $app_upload | jq -r '.upload.arn')
 
-        curl -T app/my-app.apk "$app_url"
+        curl -T app-debug1.apk "$app_url"
 
         echo "APP_ARN=$app_arn" >> $GITHUB_ENV
       env:
