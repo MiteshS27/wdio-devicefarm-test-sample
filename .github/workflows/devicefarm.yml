@@ -104,8 +104,9 @@ jobs:
         --project-arn "$DEVICEFARM_PROJECT_ARN" \
         --app-arn "$APP_ARN" \
         --device-pool-arn "$DEVICEFARM_DEVICE_POOL_ARN" \
-        --name "WDIO Test Run from GitHub Actions" \
+        --name "WDIO Test Run" \
         --test type=APPIUM_NODE,testPackageArn="$TEST_ARN",testSpecArn="$TEST_SPEC_ARN" \
+        --configuration "{\"extraDataPackageArn\":null,\"locale\":\"en_US\",\"location\":{\"latitude\":47.6205,\"longitude\":-122.3493},\"networkProfileArn\":null,\"radios\":{\"bluetooth\":true,\"gps\":true,\"nfc\":true,\"wifi\":true},\"billingMethod\":\"METERED\",\"vpceConfigurationArns\":[]}" \
         --region "$AWS_REGION"
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
