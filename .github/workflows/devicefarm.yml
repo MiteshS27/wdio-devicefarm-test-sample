@@ -1,0 +1,81 @@
+name: Run WDIO on AWS Device Farm
+
+on:
+  workflow_dispatch:
+
+jobs:
+  upload-and-run:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Zip test bundle
+      run: zip -r test-bundle.zip . -x "*.git*" "node_modules/*"
+
+    - name: Upload App (.apk)
+      id: upload_app
+      run: |
+        app_upload=$(aws devicefarm create-upload \
+          --project-arn "$DEVICEFARM_PROJECT_ARN" \
+          --name "my-app.apk" \
+          --type ANDROID_APP \
+          --region $AWS_REGION)
+        
+        app_url=$(echo $app_upload | jq -r '.upload.url')
+        app_arn=$(echo $app_upload | jq -r '.upload.arn')
+
+        curl -T app/my-app.apk "$app_url"
+
+        echo "APP_ARN=$app_arn" >> $GITHUB_ENV
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+        DEVICEFARM_PROJECT_ARN: ${{ secrets.DEVICEFARM_PROJECT_ARN }}
+
+    - name: Upload WDIO test package
+      id: upload_test
+      run: |
+        test_upload=$(aws devicefarm create-upload \
+          --project-arn "$DEVICEFARM_PROJECT_ARN" \
+          --name "test-bundle.zip" \
+          --type APPIUM_NODE_TEST_PACKAGE \
+          --region $AWS_REGION)
+        
+        test_url=$(echo $test_upload | jq -r '.upload.url')
+        test_arn=$(echo $test_upload | jq -r '.upload.arn')
+
+        curl -T test-bundle.zip "$test_url"
+
+        echo "TEST_ARN=$test_arn" >> $GITHUB_ENV
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+        DEVICEFARM_PROJECT_ARN: ${{ secrets.DEVICEFARM_PROJECT_ARN }}
+
+    - name: Start test run on AWS Device Farm
+      run: |
+        aws devicefarm schedule-run \
+          --project-arn "$DEVICEFARM_PROJECT_ARN" \
+          --app-arn "$APP_ARN" \
+          --device-pool-arn "$DEVICEFARM_DEVICE_POOL_ARN" \
+          --name "WDIO Test Run from GitHub Actions" \
+          --test type=APPIUM_NODE,testPackageArn="$TEST_ARN" \
+          --region $AWS_REGION
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+        DEVICEFARM_PROJECT_ARN: ${{ secrets.DEVICEFARM_PROJECT_ARN }}
+        DEVICEFARM_DEVICE_POOL_ARN: ${{ secrets.DEVICEFARM_DEVICE_POOL_ARN }}
